@@ -80,7 +80,7 @@ public class ConversationContainer implements Serializable {
 	 * Return the current size of the conversation container:
 	 * the number of conversations contained within it.
 	 */
-	public int size() {
+	public synchronized int size() {
 		return conversations.size();
 	}
 
@@ -126,7 +126,7 @@ public class ConversationContainer implements Serializable {
 		throw new NoSuchConversationException(id);
 	}
 
-	protected final List<ContainedConversation> getConversations() {
+	protected synchronized final List<ContainedConversation> getConversations() {
 		return conversations;
 	}
 
@@ -146,7 +146,7 @@ public class ConversationContainer implements Serializable {
 	/**
 	 * Has the maximum number of allowed concurrent conversations in the session been exceeded?
 	 */
-	private boolean maxExceeded() {
+	private synchronized boolean maxExceeded() {
 		return maxConversations > 0 && conversations.size() > maxConversations;
 	}
 

@@ -50,7 +50,7 @@ class SimpleFlowExecutionSnapshotGroup implements FlowExecutionSnapshotGroup, Se
 	/**
 	 * The snapshot id sequence ensuring unique snapshot ids within this group; snapshot ids start at 1.
 	 */
-	private int snapshotIdSequence = 1;
+	private volatile int snapshotIdSequence = 1;
 
 	/**
 	 * Returns the maximum number of snapshots allowed in this group.
@@ -67,7 +67,7 @@ class SimpleFlowExecutionSnapshotGroup implements FlowExecutionSnapshotGroup, Se
 		this.maxSnapshots = maxSnapshots;
 	}
 
-	public FlowExecutionSnapshot getSnapshot(Serializable snapshotId) throws SnapshotNotFoundException {
+	public synchronized FlowExecutionSnapshot getSnapshot(Serializable snapshotId) throws SnapshotNotFoundException {
 		FlowExecutionSnapshot snapshot = snapshots.get(snapshotId);
 		if (snapshot == null) {
 			throw new SnapshotNotFoundException(snapshotId);
@@ -75,7 +75,7 @@ class SimpleFlowExecutionSnapshotGroup implements FlowExecutionSnapshotGroup, Se
 		return snapshot;
 	}
 
-	public void addSnapshot(Serializable snapshotId, FlowExecutionSnapshot snapshot) {
+	public synchronized void addSnapshot(Serializable snapshotId, FlowExecutionSnapshot snapshot) {
 		snapshots.put(snapshotId, snapshot);
 		if (snapshotIds.contains(snapshotId)) {
 			snapshotIds.remove(snapshotId);
@@ -86,24 +86,24 @@ class SimpleFlowExecutionSnapshotGroup implements FlowExecutionSnapshotGroup, Se
 		}
 	}
 
-	public void updateSnapshot(Serializable snapshotId, FlowExecutionSnapshot snapshot) {
+	public synchronized void updateSnapshot(Serializable snapshotId, FlowExecutionSnapshot snapshot) {
 		if (!snapshots.containsKey(snapshotId)) {
 			return;
 		}
 		snapshots.put(snapshotId, snapshot);
 	}
 
-	public void removeSnapshot(Serializable snapshotId) {
+	public synchronized void removeSnapshot(Serializable snapshotId) {
 		snapshots.remove(snapshotId);
 		snapshotIds.remove(snapshotId);
 	}
 
-	public void removeAllSnapshots() {
+	public synchronized void removeAllSnapshots() {
 		snapshots.clear();
 		snapshotIds.clear();
 	}
 
-	public int getSnapshotCount() {
+	public synchronized int getSnapshotCount() {
 		return snapshotIds.size();
 	}
 
@@ -123,7 +123,7 @@ class SimpleFlowExecutionSnapshotGroup implements FlowExecutionSnapshotGroup, Se
 	/**
 	 * Remove the olders snapshot from this group.
 	 */
-	private void removeOldestSnapshot() {
+	private synchronized void removeOldestSnapshot() {
 		snapshots.remove(snapshotIds.removeFirst());
 	}
 

@@ -77,18 +77,18 @@ public class ContainedConversation implements Conversation, Serializable {
 		this.lock.lock();
 	}
 
-	public Object getAttribute(Object name) {
+	public synchronized Object getAttribute(Object name) {
 		return this.attributes.get(name);
 	}
 
-	public void putAttribute(Object name, Object value) {
+	public synchronized void putAttribute(Object name, Object value) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Putting conversation attribute '" + name + "' with value " + value);
 		}
 		this.attributes.put(name, value);
 	}
 
-	public void removeAttribute(Object name) {
+	public synchronized void removeAttribute(Object name) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removing conversation attribute '" + name + "'");
 		}
